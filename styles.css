@@ -1,0 +1,309 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+    --bg-color: #0f172a;
+    --text-color: #f8fafc;
+    --text-muted: #94a3b8;
+    --primary: #3b82f6;
+    --primary-hover: #2563eb;
+    --secondary: #1e293b;
+    --border: #334155;
+    --success: #10b981;
+    --error: #ef4444;
+    --glass-bg: rgba(30, 41, 59, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-image: radial-gradient(circle at top right, rgba(59, 130, 246, 0.15), transparent 40%),
+                      radial-gradient(circle at bottom left, rgba(16, 185, 129, 0.1), transparent 40%);
+}
+
+header {
+    width: 100%;
+    padding: 2rem;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+header h1 {
+    font-weight: 700;
+    font-size: 2rem;
+    background: linear-gradient(to right, #60a5fa, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    cursor: pointer;
+}
+
+header p {
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+}
+
+main {
+    width: 100%;
+    max-width: 1000px;
+    padding: 3rem 2rem;
+    flex: 1;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    backdrop-filter: blur(12px);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+    border-color: rgba(96, 165, 250, 0.5);
+}
+
+.card h2 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+    color: #e2e8f0;
+}
+
+.card p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.card .icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    display: inline-block;
+}
+
+/* Exercise Views */
+.view {
+    display: none;
+    animation: fadeIn 0.4s ease forwards;
+}
+
+.view.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.exercise-container {
+    background: var(--secondary);
+    border-radius: 16px;
+    padding: 2.5rem;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.exercise-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: var(--primary);
+}
+
+.exercise-text {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #cbd5e1;
+    margin-bottom: 2rem;
+}
+
+.gap-select, .gap-input {
+    background: #0f172a;
+    border: 1px solid var(--border);
+    color: white;
+    padding: 0.2rem 0.5rem;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.gap-select:focus, .gap-input:focus {
+    border-color: var(--primary);
+}
+
+.btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+}
+
+.btn:hover {
+    background: var(--primary-hover);
+}
+
+.btn:active {
+    transform: scale(0.98);
+}
+
+.btn-secondary {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+}
+
+.btn-secondary:hover {
+    background: var(--secondary);
+    color: white;
+}
+
+.feedback {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    border-radius: 8px;
+    font-weight: 500;
+    display: none;
+}
+
+.feedback.success {
+    display: block;
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--success);
+    border: 1px solid var(--success);
+}
+
+.feedback.error {
+    display: block;
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--error);
+    border: 1px solid var(--error);
+}
+
+.nav-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 2rem;
+}
+
+.word-formation-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.root-word {
+    font-weight: bold;
+    color: #a78bfa;
+    text-transform: uppercase;
+    min-width: 120px;
+}
+
+.keyword-box {
+    background: rgba(255,255,255,0.05);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    font-family: monospace;
+    font-size: 1.2rem;
+    text-align: center;
+    letter-spacing: 2px;
+}
+
+.phrasal-card {
+    background: var(--secondary);
+    border: 1px solid var(--border);
+    padding: 2rem;
+    border-radius: 12px;
+    text-align: center;
+    margin-bottom: 2rem;
+    cursor: pointer;
+    perspective: 1000px;
+}
+
+.phrasal-inner {
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+}
+
+.phrasal-card.flipped .phrasal-inner {
+    transform: rotateY(180deg);
+}
+
+.collocation-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.collocation-item {
+    background: var(--secondary);
+    padding: 1rem;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid var(--border);
+    cursor: grab;
+}
+
+.correct-input {
+    border-color: var(--success) !important;
+    background-color: rgba(16, 185, 129, 0.1) !important;
+}
+
+.incorrect-input {
+    border-color: var(--error) !important;
+    background-color: rgba(239, 68, 68, 0.1) !important;
+}
+
+.correct-answer-feedback {
+    display: block;
+    color: var(--success);
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
+    font-weight: 500;
+}
+
+.pagination-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+}
