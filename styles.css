@@ -307,3 +307,96 @@ main {
     padding-top: 1rem;
     border-top: 1px solid var(--border);
 }
+
+/* Reading Passage & Test Simulator Styles */
+.test-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.test-tab-btn {
+    background: var(--secondary);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 0.5rem 1.2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.test-tab-btn:hover {
+    border-color: var(--primary);
+    color: white;
+}
+
+.test-tab-btn.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.reading-article {
+    background: var(--secondary);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    line-height: 2.2;
+    font-size: 1.1rem;
+    color: #e2e8f0;
+    margin-bottom: 2rem;
+}
+
+.reading-article p {
+    margin-bottom: 1.5rem;
+}
+
+.reading-article p:last-child {
+    margin-bottom: 0;
+}
+
+.gap-num {
+    display: inline-block;
+    font-weight: 700;
+    color: var(--primary);
+    margin-right: 0.25rem;
+    font-size: 0.95rem;
+}
+
+.root-tag {
+    display: inline-block;
+    background: rgba(167, 139, 250, 0.15);
+    color: #c084fc;
+    border: 1px solid rgba(167, 139, 250, 0.4);
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 0.1rem 0.5rem;
+    border-radius: 4px;
+    margin-left: 0.3rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.score-badge {
+    padding: 1rem 1.5rem;
+    border-radius: 10px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.score-badge.success {
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid var(--success);
+    color: var(--success);
+}
+
+.score-badge.error {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid var(--error);
+    color: var(--error);
+}
+

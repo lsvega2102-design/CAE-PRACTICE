@@ -1,7 +1,7 @@
 const app = {
     currentView: 'dashboard',
     currentExerciseType: null,
-    currentExerciseData: null,
+    currentTestIndex: 0,
     currentPage: 1,
     itemsPerPage: 10,
     previousView: 'dashboard',
@@ -50,8 +50,27 @@ const app = {
         fb.style.display = 'block';
     },
 
+    selectTest: function(testIndex) {
+        this.currentTestIndex = testIndex;
+        this.clearFeedback();
+        this.loadExercise(this.currentExerciseType);
+    },
+
+    renderTestTabs: function(type) {
+        const tests = appData[type];
+        if (!tests || !tests.length) return '';
+        let html = `<div class="test-tabs">`;
+        tests.forEach((test, idx) => {
+            const activeClass = idx === this.currentTestIndex ? 'active' : '';
+            html += `<button class="test-tab-btn ${activeClass}" onclick="app.selectTest(${idx})">Test ${idx + 1}</button>`;
+        });
+        html += `</div>`;
+        return html;
+    },
+
     loadExercise: function(type) {
         if (this.currentExerciseType !== type) {
+            this.currentTestIndex = 0;
             this.currentPage = 1;
         }
         this.currentExerciseType = type;
@@ -63,29 +82,25 @@ const app = {
 
         switch(type) {
             case 'part1':
-                this.currentExerciseData = appData.part1;
                 titleEl.textContent = "Part 1: Multiple-choice cloze";
-                this.renderPaginatedExercises(container, 'part1');
+                this.renderPart1(container);
                 break;
             case 'part2':
-                this.currentExerciseData = appData.part2;
                 titleEl.textContent = "Part 2: Open cloze";
-                this.renderPaginatedExercises(container, 'part2');
+                this.renderPart2(container);
                 break;
             case 'part3':
-                this.currentExerciseData = appData.part3;
                 titleEl.textContent = "Part 3: Word formation";
-                this.renderPaginatedExercises(container, 'part3');
+                this.renderPart3(container);
                 break;
             case 'part4':
-                this.currentExerciseData = appData.part4;
                 titleEl.textContent = "Part 4: Key word transformation";
-                this.renderPaginatedExercises(container, 'part4');
+                this.renderPart4(container);
                 break;
             case 'phrasal':
                 this.currentExerciseData = appData.phrasalVerbs;
                 titleEl.textContent = "Phrasal Verbs Practice";
-                this.renderPaginatedExercises(container, 'phrasal');
+                this.renderPhrasal(container);
                 break;
             case 'collocations':
                 this.currentExerciseData = appData.collocations;
@@ -95,22 +110,160 @@ const app = {
         }
     },
 
-    // ─── UNIFIED PAGINATED RENDERER ───────────────────────────
-    renderPaginatedExercises: function(container, type) {
+    // ─── PART 1: MULTIPLE-CHOICE CLOZE (Full Text) ────────────
+    renderPart1: function(container) {
+        if (!window.appData || !appData.part1) {
+            container.innerHTML = '<p class="exercise-text" style="color:var(--error);">Data error: appData.part1 is not loaded. Please refresh the page.</p>';
+            return;
+        }
+        if (this.currentTestIndex >= appData.part1.length) this.currentTestIndex = 0;
+        const test = appData.part1[this.currentTestIndex];
+        if (!test) {
+            container.innerHTML = '<p class="exercise-text">No test found for Part 1.</p>';
+            return;
+        }
+
+        let html = this.renderTestTabs('part1');
+        html += `<h3 style="font-size:1.3rem; margin-bottom:0.75rem; color:var(--primary);">${test.title}</h3>`;
+        html += `<p class="exercise-text" style="margin-bottom:1.5rem;">Read the text below and choose the word (A, B, C or D) that best fits each gap.</p>`;
+
+        let textWithGaps = test.text;
+        test.questions.forEach(q => {
+            let selectHtml = `<span class="gap-num">(${q.gap})</span>` +
+                `<select id="gap-${q.gap}" class="gap-select" style="margin: 0 4px;">` +
+                `<option value="">-- ? --</option>` +
+                q.options.map(opt => `<option value="${opt}">${opt}</option>`).join('') +
+                `</select>` +
+                `<span id="feedback-gap-${q.gap}" class="correct-answer-feedback" style="display:inline-block; margin-left:4px;"></span>`;
+            textWithGaps = textWithGaps.replace(`{gap${q.gap}}`, selectHtml);
+        });
+
+        const paragraphs = textWithGaps.split('\n\n').map(p => `<p>${p}</p>`).join('');
+        html += `<div class="reading-article">${paragraphs}</div>`;
+        container.innerHTML = html;
+    },
+
+    // ─── PART 2: OPEN CLOZE (Full Text) ───────────────────────
+    renderPart2: function(container) {
+        if (!window.appData || !appData.part2) {
+            container.innerHTML = '<p class="exercise-text" style="color:var(--error);">Data error: appData.part2 is not loaded. Please refresh the page.</p>';
+            return;
+        }
+        if (this.currentTestIndex >= appData.part2.length) this.currentTestIndex = 0;
+        const test = appData.part2[this.currentTestIndex];
+        if (!test) {
+            container.innerHTML = '<p class="exercise-text">No test found for Part 2.</p>';
+            return;
+        }
+
+        let html = this.renderTestTabs('part2');
+        html += `<h3 style="font-size:1.3rem; margin-bottom:0.75rem; color:var(--primary);">${test.title}</h3>`;
+        html += `<p class="exercise-text" style="margin-bottom:1.5rem;">Read the text below and type the word which best fits each gap. Use <strong>ONLY ONE word</strong> in each gap.</p>`;
+
+        let textWithGaps = test.text;
+        test.answers.forEach(q => {
+            let inputHtml = `<span class="gap-num">(${q.gap})</span>` +
+                `<input type="text" id="gap-${q.gap}" class="gap-input" style="width: 100px; margin: 0 4px;" autocomplete="off" placeholder="...">` +
+                `<span id="feedback-gap-${q.gap}" class="correct-answer-feedback" style="display:inline-block; margin-left:4px;"></span>`;
+            textWithGaps = textWithGaps.replace(`{gap${q.gap}}`, inputHtml);
+        });
+
+        const paragraphs = textWithGaps.split('\n\n').map(p => `<p>${p}</p>`).join('');
+        html += `<div class="reading-article">${paragraphs}</div>`;
+        container.innerHTML = html;
+    },
+
+    // ─── PART 3: WORD FORMATION (Full Text) ───────────────────
+    renderPart3: function(container) {
+        if (!window.appData || !appData.part3) {
+            container.innerHTML = '<p class="exercise-text" style="color:var(--error);">Data error: appData.part3 is not loaded. Please refresh the page.</p>';
+            return;
+        }
+        if (this.currentTestIndex >= appData.part3.length) this.currentTestIndex = 0;
+        const test = appData.part3[this.currentTestIndex];
+        if (!test) {
+            container.innerHTML = '<p class="exercise-text">No test found for Part 3.</p>';
+            return;
+        }
+
+        let html = this.renderTestTabs('part3');
+        html += `<h3 style="font-size:1.3rem; margin-bottom:0.75rem; color:var(--primary);">${test.title}</h3>`;
+        html += `<p class="exercise-text" style="margin-bottom:1.5rem;">Read the text below. Use the word given in <strong>CAPITALS</strong> at the end of each gap to form a word that fits in the gap.</p>`;
+
+        let textWithGaps = test.text;
+        test.questions.forEach(q => {
+            let inputHtml = `<span class="gap-num">(${q.gap})</span>` +
+                `<input type="text" id="gap-${q.gap}" class="gap-input" style="width: 140px; margin: 0 4px;" autocomplete="off" placeholder="transform...">` +
+                `<span class="root-tag">${q.root}</span>` +
+                `<span id="feedback-gap-${q.gap}" class="correct-answer-feedback" style="display:inline-block; margin-left:4px;"></span>`;
+            textWithGaps = textWithGaps.replace(`{gap${q.gap}}`, inputHtml);
+        });
+
+        const paragraphs = textWithGaps.split('\n\n').map(p => `<p>${p}</p>`).join('');
+        html += `<div class="reading-article">${paragraphs}</div>`;
+        container.innerHTML = html;
+    },
+
+    // ─── PART 4: KEY WORD TRANSFORMATION (6 Items) ────────────
+    renderPart4: function(container) {
+        if (!window.appData || !appData.part4) {
+            container.innerHTML = '<p class="exercise-text" style="color:var(--error);">Data error: appData.part4 is not loaded. Please refresh the page.</p>';
+            return;
+        }
+        if (this.currentTestIndex >= appData.part4.length) this.currentTestIndex = 0;
+        const test = appData.part4[this.currentTestIndex];
+        if (!test) {
+            container.innerHTML = '<p class="exercise-text">No test found for Part 4.</p>';
+            return;
+        }
+
+        let html = this.renderTestTabs('part4');
+        html += `<h3 style="font-size:1.3rem; margin-bottom:0.75rem; color:var(--primary);">${test.title}</h3>`;
+        html += `<p class="exercise-text" style="margin-bottom:1.5rem;">Complete the second sentence so that it has a similar meaning to the first sentence, using the word given. <strong>Do not change the word given</strong>. You must use between <strong>three and six words</strong>, including the word given.</p>`;
+
+        html += `<div style="display:flex; flex-direction:column; gap: 1.5rem;">`;
+        test.items.forEach(item => {
+            html += `
+                <div style="background: var(--secondary); border: 1px solid var(--border); padding: 1.5rem; border-radius: 12px;">
+                    <div style="font-weight: bold; color: var(--text-muted); margin-bottom: 0.5rem; font-size: 0.85rem;">Question ${item.id}</div>
+                    <div style="font-size: 1.05rem; line-height: 1.6; margin-bottom: 0.75rem; color: #cbd5e1;">${item.original}</div>
+                    <div class="keyword-box" style="margin-bottom: 0.75rem;">${item.keyword}</div>
+                    <div style="font-size: 1.1rem; line-height: 1.8;">
+                        ${item.prompt} 
+                        <input type="text" id="gap-${item.id}" class="gap-input" style="width: 280px;" autocomplete="off" placeholder="3-6 words..."> 
+                        ${item.end}
+                        <div id="feedback-gap-${item.id}" class="correct-answer-feedback" style="display:none;"></div>
+                    </div>
+                </div>`;
+        });
+        html += `</div>`;
+        container.innerHTML = html;
+    },
+
+    // ─── PHRASAL VERBS (Paginated Cards) ──────────────────────
+    renderPhrasal: function(container) {
         const startIndex = (this.currentPage - 1) * this.itemsPerPage;
         const endIndex = startIndex + this.itemsPerPage;
         const currentBatch = this.currentExerciseData.slice(startIndex, endIndex);
 
-        let html = this.getInstructionText(type);
+        let html = `<p class="exercise-text">Read the meaning and the example sentence, then type the correct <strong>phrasal verb</strong> (conjugated to fit the sentence).</p>`;
         html += `<div style="display:flex; flex-direction:column; gap: 1.5rem;">`;
 
         currentBatch.forEach(item => {
-            html += this.renderExerciseItem(item, type);
+            let exampleWithGap = item.example.replace('{gap}', 
+                `<input type="text" id="phrasal-${item.id}" class="gap-input" style="width: 150px;" autocomplete="off" placeholder="type verb...">`
+            );
+            html += `
+                <div style="background: var(--secondary); border: 1px solid var(--border); padding: 1.5rem; border-radius: 12px;">
+                    <div style="font-weight: bold; color: var(--primary); margin-bottom: 0.5rem;">Meaning: ${item.meaning}</div>
+                    <div style="font-size: 1.1rem; line-height: 1.8;">
+                        ${exampleWithGap}
+                        <div id="phrasal-feedback-${item.id}" class="correct-answer-feedback" style="display:none;"></div>
+                    </div>
+                </div>`;
         });
-
         html += `</div>`;
 
-        // Pagination
         const totalPages = Math.ceil(this.currentExerciseData.length / this.itemsPerPage);
         if (totalPages > 1) {
             html += `<div id="pagination-controls" class="pagination-controls"></div>`;
@@ -121,109 +274,6 @@ const app = {
         }
     },
 
-    getInstructionText: function(type) {
-        const instructions = {
-            part1: `<p class="exercise-text">Read each sentence and choose the word (A, B, C or D) that best fits the gap.</p>`,
-            part2: `<p class="exercise-text">Read each sentence and type the missing word. Only ONE word is needed for each gap.</p>`,
-            part3: `<p class="exercise-text">Read each sentence. Use the word given in <strong>CAPITALS</strong> to form a word that fits in the gap.</p>`,
-            part4: `<p class="exercise-text">Complete the second sentence so that it has a similar meaning to the first. Use the <strong>keyword</strong> given. You must use between <strong>3 and 6 words</strong>, including the keyword.</p>`,
-            phrasal: `<p class="exercise-text">Read the meaning and the example sentence, then type the correct <strong>phrasal verb</strong> (conjugated to fit the sentence).</p>`
-        };
-        return instructions[type] || '';
-    },
-
-    // ─── INDIVIDUAL EXERCISE RENDERERS ────────────────────────
-    renderExerciseItem: function(item, type) {
-        switch(type) {
-            case 'part1': return this.renderPart1Item(item);
-            case 'part2': return this.renderPart2Item(item);
-            case 'part3': return this.renderPart3Item(item);
-            case 'part4': return this.renderPart4Item(item);
-            case 'phrasal': return this.renderPhrasalItem(item);
-            default: return '';
-        }
-    },
-
-    renderPart1Item: function(item) {
-        let sentenceHtml = item.sentence.replace('{gap}', 
-            `<select id="ex-${item.id}" class="gap-select">
-                <option value="">-- Choose --</option>
-                ${item.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
-            </select>`
-        );
-        return `
-            <div style="background: var(--secondary); border: 1px solid var(--border); padding: 1.5rem; border-radius: 12px;">
-                <div style="font-weight: bold; color: var(--text-muted); margin-bottom: 0.5rem; font-size: 0.85rem;">Question ${item.id}</div>
-                <div style="font-size: 1.1rem; line-height: 1.8;">
-                    ${sentenceHtml}
-                    <div id="feedback-${item.id}" class="correct-answer-feedback" style="display:none;"></div>
-                </div>
-            </div>`;
-    },
-
-    renderPart2Item: function(item) {
-        let sentenceHtml = item.sentence.replace('{gap}', 
-            `<input type="text" id="ex-${item.id}" class="gap-input" style="width: 100px;" autocomplete="off" placeholder="type word...">`
-        );
-        return `
-            <div style="background: var(--secondary); border: 1px solid var(--border); padding: 1.5rem; border-radius: 12px;">
-                <div style="font-weight: bold; color: var(--text-muted); margin-bottom: 0.5rem; font-size: 0.85rem;">Question ${item.id}</div>
-                <div style="font-size: 1.1rem; line-height: 1.8;">
-                    ${sentenceHtml}
-                    <div id="feedback-${item.id}" class="correct-answer-feedback" style="display:none;"></div>
-                </div>
-            </div>`;
-    },
-
-    renderPart3Item: function(item) {
-        let sentenceHtml = item.sentence.replace('{gap}', 
-            `<input type="text" id="ex-${item.id}" class="gap-input" style="width: 140px;" autocomplete="off" placeholder="transform...">`
-        );
-        return `
-            <div style="background: var(--secondary); border: 1px solid var(--border); padding: 1.5rem; border-radius: 12px;">
-                <div style="font-weight: bold; color: var(--text-muted); margin-bottom: 0.5rem; font-size: 0.85rem;">Question ${item.id}</div>
-                <div style="font-size: 1.1rem; line-height: 1.8;">
-                    ${sentenceHtml}
-                </div>
-                <div style="margin-top: 0.5rem;">
-                    <span class="root-word">Root: ${item.root}</span>
-                    <div id="feedback-${item.id}" class="correct-answer-feedback" style="display:none;"></div>
-                </div>
-            </div>`;
-    },
-
-    renderPart4Item: function(item) {
-        return `
-            <div style="background: var(--secondary); border: 1px solid var(--border); padding: 1.5rem; border-radius: 12px;">
-                <div style="font-weight: bold; color: var(--text-muted); margin-bottom: 0.5rem; font-size: 0.85rem;">Question ${item.id}</div>
-                <div style="font-size: 1.05rem; line-height: 1.6; margin-bottom: 0.75rem; color: #cbd5e1;">
-                    ${item.original}
-                </div>
-                <div class="keyword-box" style="margin-bottom: 0.75rem;">${item.keyword}</div>
-                <div style="font-size: 1.1rem; line-height: 1.8;">
-                    ${item.prompt} 
-                    <input type="text" id="ex-${item.id}" class="gap-input" style="width: 250px;" autocomplete="off" placeholder="3-6 words..."> 
-                    ${item.end}
-                    <div id="feedback-${item.id}" class="correct-answer-feedback" style="display:none;"></div>
-                </div>
-            </div>`;
-    },
-
-    renderPhrasalItem: function(item) {
-        let exampleWithGap = item.example.replace('{gap}', 
-            `<input type="text" id="ex-${item.id}" class="gap-input" style="width: 150px;" autocomplete="off" placeholder="type verb...">`
-        );
-        return `
-            <div style="background: var(--secondary); border: 1px solid var(--border); padding: 1.5rem; border-radius: 12px;">
-                <div style="font-weight: bold; color: var(--primary); margin-bottom: 0.5rem;">Meaning: ${item.meaning}</div>
-                <div style="font-size: 1.1rem; line-height: 1.8;">
-                    ${exampleWithGap}
-                    <div id="feedback-${item.id}" class="correct-answer-feedback" style="display:none;"></div>
-                </div>
-            </div>`;
-    },
-
-    // ─── PAGINATION SETUP ─────────────────────────────────────
     setupPagination: function(totalPages) {
         const paginationControls = document.getElementById('pagination-controls');
         let pageButtons = '';
@@ -241,11 +291,19 @@ const app = {
         `;
 
         document.getElementById('btn-prev').addEventListener('click', () => {
-            if (this.currentPage > 1) this.changePage(-1);
+            if (this.currentPage > 1) {
+                this.currentPage--;
+                this.clearFeedback();
+                this.loadExercise('phrasal');
+            }
         });
 
         document.getElementById('btn-next').addEventListener('click', () => {
-            if (this.currentPage < totalPages) this.changePage(1);
+            if (this.currentPage < totalPages) {
+                this.currentPage++;
+                this.clearFeedback();
+                this.loadExercise('phrasal');
+            }
         });
 
         document.querySelectorAll('.page-btn').forEach(btn => {
@@ -253,12 +311,12 @@ const app = {
                 const selectedPage = parseInt(e.target.getAttribute('data-page'));
                 this.currentPage = selectedPage;
                 this.clearFeedback();
-                this.loadExercise(this.currentExerciseType);
+                this.loadExercise('phrasal');
             });
         });
     },
 
-    // ─── COLLOCATIONS (unchanged) ─────────────────────────────
+    // ─── COLLOCATIONS ─────────────────────────────────────────
     renderCollocations: function(container) {
         let html = `<p class="exercise-text">Match the verbs on the left with the correct noun phrases on the right.</p>
         <div class="collocation-grid">
@@ -270,7 +328,7 @@ const app = {
         html += `</div><div style="display:flex; flex-direction:column; gap:1rem;">`;
         
         let rightSide = [...this.currentExerciseData].sort(() => Math.random() - 0.5);
-        rightSide.forEach((item, i) => {
+        rightSide.forEach((item) => {
             html += `<div class="collocation-item"><select id="colloc-${item.id}" class="gap-select" style="width:100%; margin-bottom: 0.5rem;"><option value="">-- Select Verb --</option>`;
             this.currentExerciseData.forEach(v => {
                 html += `<option value="${v.part1}">${v.part1}</option>`;
@@ -283,93 +341,138 @@ const app = {
         this.currentExerciseData.shuffledRight = rightSide;
     },
 
-    changePage: function(delta) {
-        this.currentPage += delta;
-        this.clearFeedback();
-        this.loadExercise(this.currentExerciseType);
-    },
-
-    // ─── UNIFIED CHECK ANSWER ─────────────────────────────────
+    // ─── CHECK ANSWERS FOR SIMULATOR ──────────────────────────
     checkAnswer: function() {
         this.clearFeedback();
-        let isCorrect = true;
-        let message = "All correct! Great job! 🎉";
+        let total = 0;
+        let correct = 0;
 
-        if (this.currentExerciseType === 'collocations') {
-            this.currentExerciseData.shuffledRight.forEach(item => {
-                const val = document.getElementById(`colloc-${item.id}`).value;
-                if (val !== item.part1) isCorrect = false;
+        if (this.currentExerciseType === 'part1') {
+            const test = appData.part1[this.currentTestIndex];
+            total = test.questions.length;
+            test.questions.forEach(q => {
+                const el = document.getElementById(`gap-${q.gap}`);
+                const fb = document.getElementById(`feedback-gap-${q.gap}`);
+                const val = el ? el.value : '';
+                el.classList.remove('correct-input', 'incorrect-input');
+                if (val === q.answer) {
+                    correct++;
+                    el.classList.add('correct-input');
+                    if (fb) fb.style.display = 'none';
+                } else {
+                    el.classList.add('incorrect-input');
+                    if (fb) {
+                        fb.textContent = ` (✓ ${q.answer})`;
+                        fb.style.display = 'inline-block';
+                    }
+                }
             });
-        } else {
-            // Unified check for all paginated types
+        } 
+        else if (this.currentExerciseType === 'part2') {
+            const test = appData.part2[this.currentTestIndex];
+            total = test.answers.length;
+            test.answers.forEach(q => {
+                const el = document.getElementById(`gap-${q.gap}`);
+                const fb = document.getElementById(`feedback-gap-${q.gap}`);
+                const val = el ? el.value.trim().toLowerCase() : '';
+                el.classList.remove('correct-input', 'incorrect-input');
+                if (val === q.answer.toLowerCase()) {
+                    correct++;
+                    el.classList.add('correct-input');
+                    if (fb) fb.style.display = 'none';
+                } else {
+                    el.classList.add('incorrect-input');
+                    if (fb) {
+                        fb.textContent = ` (✓ ${q.answer})`;
+                        fb.style.display = 'inline-block';
+                    }
+                }
+            });
+        }
+        else if (this.currentExerciseType === 'part3') {
+            const test = appData.part3[this.currentTestIndex];
+            total = test.questions.length;
+            test.questions.forEach(q => {
+                const el = document.getElementById(`gap-${q.gap}`);
+                const fb = document.getElementById(`feedback-gap-${q.gap}`);
+                const val = el ? el.value.trim().toLowerCase() : '';
+                el.classList.remove('correct-input', 'incorrect-input');
+                if (val === q.answer.toLowerCase()) {
+                    correct++;
+                    el.classList.add('correct-input');
+                    if (fb) fb.style.display = 'none';
+                } else {
+                    el.classList.add('incorrect-input');
+                    if (fb) {
+                        fb.textContent = ` (✓ ${q.answer})`;
+                        fb.style.display = 'inline-block';
+                    }
+                }
+            });
+        }
+        else if (this.currentExerciseType === 'part4') {
+            const test = appData.part4[this.currentTestIndex];
+            total = test.items.length;
+            test.items.forEach(item => {
+                const el = document.getElementById(`gap-${item.id}`);
+                const fb = document.getElementById(`feedback-gap-${item.id}`);
+                const val = el ? el.value.trim().toLowerCase().replace(/\s+/g, ' ') : '';
+                const expected = item.answer.toLowerCase().replace(/\s+/g, ' ');
+                el.classList.remove('correct-input', 'incorrect-input');
+                if (val === expected) {
+                    correct++;
+                    el.classList.add('correct-input');
+                    if (fb) fb.style.display = 'none';
+                } else {
+                    el.classList.add('incorrect-input');
+                    if (fb) {
+                        fb.textContent = `Correct answer: ${item.answer}`;
+                        fb.style.display = 'block';
+                    }
+                }
+            });
+        }
+        else if (this.currentExerciseType === 'phrasal') {
             const startIndex = (this.currentPage - 1) * this.itemsPerPage;
             const endIndex = startIndex + this.itemsPerPage;
             const currentBatch = this.currentExerciseData.slice(startIndex, endIndex);
+            total = currentBatch.length;
 
             currentBatch.forEach(item => {
-                const input = document.getElementById(`ex-${item.id}`);
-                const feedbackBox = document.getElementById(`feedback-${item.id}`);
+                const input = document.getElementById(`phrasal-${item.id}`);
+                const feedbackBox = document.getElementById(`phrasal-feedback-${item.id}`);
+                const val = input ? input.value.trim().toLowerCase() : '';
                 
-                if (!input || !feedbackBox) return;
-
-                // Reset styles
+                if (!input) return;
                 input.classList.remove('correct-input', 'incorrect-input');
-                feedbackBox.style.display = 'none';
+                if (feedbackBox) feedbackBox.style.display = 'none';
 
-                const userVal = input.tagName === 'SELECT' ? input.value : input.value.trim();
-                const expectedAnswer = this.getExpectedAnswer(item);
-                const isItemCorrect = this.compareAnswer(userVal, expectedAnswer, this.currentExerciseType);
+                const expectedAnswer = item.answer || item.verb;
 
-                if (!isItemCorrect) {
-                    isCorrect = false;
+                if (val !== expectedAnswer.toLowerCase()) {
                     input.classList.add('incorrect-input');
-                    feedbackBox.textContent = `Correct answer: ${expectedAnswer}`;
-                    feedbackBox.style.display = 'block';
+                    if (feedbackBox) {
+                        feedbackBox.textContent = `Correct answer: ${expectedAnswer}`;
+                        feedbackBox.style.display = 'block';
+                    }
                 } else {
+                    correct++;
                     input.classList.add('correct-input');
                 }
             });
         }
-
-        if (!isCorrect && message === "All correct! Great job! 🎉") {
-            message = "Some answers are incorrect. Keep trying! 💪";
+        else if (this.currentExerciseType === 'collocations') {
+            total = this.currentExerciseData.length;
+            this.currentExerciseData.shuffledRight.forEach(item => {
+                const val = document.getElementById(`colloc-${item.id}`).value;
+                if (val === item.part1) correct++;
+            });
         }
 
-        this.showFeedback(isCorrect, message);
-    },
-
-    getExpectedAnswer: function(item) {
-        if (this.currentExerciseType === 'phrasal') {
-            return item.answer || item.verb;
-        }
-        return item.answer;
-    },
-
-    compareAnswer: function(userVal, expected, type) {
-        if (!userVal || !expected) return false;
-
-        if (type === 'part1') {
-            // Select-based: exact match
-            return userVal.toLowerCase() === expected.toLowerCase();
-        }
-        if (type === 'part2') {
-            // Open cloze: case-insensitive
-            return userVal.toLowerCase() === expected.toLowerCase();
-        }
-        if (type === 'part3') {
-            // Word formation: case-insensitive
-            return userVal.toLowerCase() === expected.toLowerCase();
-        }
-        if (type === 'part4') {
-            // Key word transformation: case-insensitive, trim extra spaces
-            const normalizedUser = userVal.toLowerCase().replace(/\s+/g, ' ');
-            const normalizedExpected = expected.toLowerCase().replace(/\s+/g, ' ');
-            return normalizedUser === normalizedExpected;
-        }
-        if (type === 'phrasal') {
-            return userVal.toLowerCase() === expected.toLowerCase();
-        }
-        return false;
+        const percentage = Math.round((correct / total) * 100);
+        const isPassing = percentage >= 60;
+        const message = `<strong>Score: ${correct} / ${total} (${percentage}%)</strong> — ${isPassing ? 'Great job! Passing score 🎯' : 'Keep practicing! 💪'}`;
+        this.showFeedback(isPassing, message);
     }
 };
 
@@ -377,3 +480,6 @@ const app = {
 document.addEventListener('DOMContentLoaded', () => {
     app.init();
 });
+
+
+window.app = app;

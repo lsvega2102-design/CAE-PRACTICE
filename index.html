@@ -8,86 +8,70 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
     <header>
-        <h1 id="home-btn">C1 Advanced Practice</h1>
+        <h1 id="home-btn" style="cursor:pointer;">C1 Advanced Practice</h1>
         <p>Master your Reading and Use of English skills</p>
     </header>
-
     <main id="app-container">
         <!-- Dashboard View -->
         <div id="view-dashboard" class="view active">
             <div class="dashboard-grid">
-                <div class="card" onclick="app.navigate('reading-hub')">
+                <div class="card" onclick="window.app && window.app.navigate('reading-hub')">
                     <span class="icon">📚</span>
                     <h2>Reading & Use of English</h2>
                     <p>Practice Parts 1–4 of the CAE exam: multiple-choice cloze, open cloze, word formation, and key word transformations.</p>
                 </div>
-                <div class="card" onclick="app.navigate('phrasal')">
+                <div class="card" onclick="window.app && window.app.navigate('phrasal')">
                     <span class="icon">🃏</span>
                     <h2>Phrasal Verbs</h2>
                     <p>Interactive exercises to master tricky phrasal verbs with contextual sentences.</p>
                 </div>
-                <div class="card" onclick="app.navigate('collocations')">
+                <div class="card" onclick="window.app && window.app.navigate('collocations')">
                     <span class="icon">🔗</span>
                     <h2>Collocations</h2>
                     <p>Learn which words naturally go together to sound native.</p>
                 </div>
             </div>
         </div>
-
-        <!-- Reading & Use of English Sub-Dashboard -->
+        <!-- Reading & Use of English Sub‑Dashboard -->
         <div id="view-reading-hub" class="view">
-            <div style="margin-bottom: 1.5rem;">
-                <button class="btn btn-secondary" onclick="app.navigate('dashboard')" style="display: inline-flex; align-items: center; gap: 0.5rem;">
-                    ← Back to Dashboard
-                </button>
-            </div>
-            <h2 class="exercise-title" style="margin-bottom: 1.5rem;">Reading & Use of English</h2>
+            <button class="btn btn-secondary" onclick="window.app && window.app.navigate('dashboard')">← Back</button>
+            <h2 class="exercise-title">Reading & Use of English</h2>
             <div class="dashboard-grid">
-                <div class="card" onclick="app.navigate('part1')">
+                <div class="card" onclick="window.app && window.app.navigate('part1')">
                     <span class="icon">📝</span>
-                    <h2>Part 1: Multiple-choice cloze</h2>
-                    <p>Practice vocabulary, collocations, and idioms by choosing the correct word to fill the gap.</p>
+                    <h2>Part 1: Multiple‑choice cloze</h2>
                 </div>
-                <div class="card" onclick="app.navigate('part2')">
+                <div class="card" onclick="window.app && window.app.navigate('part2')">
                     <span class="icon">🧠</span>
                     <h2>Part 2: Open cloze</h2>
-                    <p>Test your grammar and vocabulary by filling the gaps without any options given.</p>
                 </div>
-                <div class="card" onclick="app.navigate('part3')">
+                <div class="card" onclick="window.app && window.app.navigate('part3')">
                     <span class="icon">✨</span>
                     <h2>Part 3: Word formation</h2>
-                    <p>Transform root words to fit grammatically into the text.</p>
                 </div>
-                <div class="card" onclick="app.navigate('part4')">
+                <div class="card" onclick="window.app && window.app.navigate('part4')">
                     <span class="icon">🔄</span>
                     <h2>Part 4: Key word transformation</h2>
-                    <p>Rewrite sentences keeping the exact meaning using a keyword in 3–6 words.</p>
                 </div>
             </div>
         </div>
-
-        <!-- Exercise Container (Injected by JS) -->
+        <!-- Exercise Container (filled by JS) -->
         <div id="view-exercise" class="view">
             <div class="exercise-container">
-                <h2 id="ex-title" class="exercise-title">Title</h2>
+                <h2 id="ex-title" class="exercise-title"></h2>
                 <div id="ex-content"></div>
                 <div id="ex-feedback" class="feedback"></div>
-                
                 <div class="nav-buttons">
-                    <button class="btn btn-secondary" id="back-btn" onclick="app.goBack()">Back</button>
-                    <button id="check-btn" class="btn" onclick="app.checkAnswer()">Check Answer</button>
+                    <button class="btn btn-secondary" id="back-btn" onclick="window.app && window.app.goBack()">Back</button>
+                    <button id="check-btn" class="btn" onclick="window.app && window.app.checkAnswer()">Check Answer</button>
                 </div>
             </div>
         </div>
     </main>
-
-    <!-- Data Scripts (loaded in order: individual data → assembly → app) -->
-    <script src="data_parts12.js"></script>
-    <script src="data_parts34.js"></script>
-    <script src="data_extras.js"></script>
+    <!-- Load data and app logic -->
     <script src="data.js"></script>
     <script src="app.js"></script>
+    <script>window.app = app;</script>
 </body>
 </html>
